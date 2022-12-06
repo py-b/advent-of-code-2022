@@ -25,16 +25,10 @@ f05 <- function(x, one_by_one = TRUE) {
 
   data <- read_stacks_moves(x)
 
-  final_stacks <-
-    seq_modify_stacks(
-      data$stacks,
-      data$moves,
-      one_by_one = one_by_one
-    )
+  final_state <- Stacks$new(data$stacks)
+  final_state$apply_moves(data$moves, one_by_one = one_by_one)
 
-  final_stacks |>
-    sapply(tail, 1) |>
-    paste(collapse = "")
+  paste(final_state$top_ones(), collapse = "")
 
 }
 
@@ -81,34 +75,6 @@ read_stacks_moves <- function(x) {
   )
 
 }
-
-modify_stacks <- function(stacks, n, from, to, one_by_one = TRUE) {
-
-  moved <- tail(stacks[[from]], n)
-  if (one_by_one) moved <- rev(moved)
-  stacks[[to]] <- c(stacks[[to]], moved)
-  stacks[[from]] <- head(stacks[[from]], -n)
-  stacks
-
-}
-
-seq_modify_stacks <- function(stacks, moves_matrix, one_by_one = TRUE) {
-
-  for (i in seq(nrow(moves_matrix))) {
-    stacks <-
-      modify_stacks(
-        stacks,
-        n    = moves_matrix[i, 1],
-        from = moves_matrix[i, 2],
-        to   = moves_matrix[i, 3],
-        one_by_one = one_by_one
-      )
-  }
-
-  stacks
-
-}
-
 
 # Examples ---------------------------------------------------------------------
 
@@ -157,3 +123,134 @@ example_data_05 <- function(example = 1) {
   l[[example]]
 }
 
+
+# Implementation with mutable objects (R6) -------------------------------------
+
+StackChar <- R6::R6Class("StackChar",
+
+  private = list(content = NULL),
+
+  public = list(
+
+    initialize = function(content = character(0)) {
+      stopifnot(is.character(content))
+      private$content <- content
+    },
+
+    get_content = function() private$content,
+
+    pop = function(n = 1, one_by_one = TRUE) {
+      res <- tail(private$content, n)
+      private$content <- head(private$content, -n)
+      if (!one_by_one) res else rev(res)
+    },
+
+    push = function(new_values) {
+      stopifnot(is.character(new_values))
+      private$content <- c(private$content, new_values)
+      invisible(self)
+    }
+
+  )
+
+)
+
+Stacks <- R6::R6Class("Stacks",
+
+  private = list(stack_list = NULL),
+
+  public = list(
+
+    initialize = function(stacks = list()) {
+      private$stack_list <- lapply(stacks, function(x) StackChar$new(x))
+    },
+
+    get_stack_list = function() {
+      lapply(
+        private$stack_list,
+        function(x) x$get_content()
+      )
+    },
+
+    add_stack = function(x) {
+      private$stack_list <- c(private$stack_list, StackChar$new(x))
+      invisible(self)
+    },
+
+    move = function(n, from, to, one_by_one = TRUE) {
+      f <- private$stack_list[[from]]
+      t <- private$stack_list[[to]]
+      n_from <- length(f$get_content())
+      if (n > n_from)
+        stop("cannot move ", n, " elements from ", from, ", only ", n_from)
+      moved <- f$pop(n, one_by_one)
+      t$push(moved)
+    },
+
+    apply_moves = function(moves_matrix, one_by_one = TRUE) {
+      for (i in seq(nrow(moves_matrix)))
+        self$move(
+          n    = moves_matrix[i, 1],
+          from = moves_matrix[i, 2],
+          to   = moves_matrix[i, 3],
+          one_by_one = one_by_one
+        )
+    },
+
+    top_ones = function() {
+      sapply(self$get_stack_list(), tail, n = 1)
+    }
+
+  )
+
+)
+
+
+# First try ---------------------------------------------------------------
+
+f05_old <- function(x, one_by_one = TRUE) {
+
+  data <- read_stacks_moves(x)
+
+  final_stacks <-
+    seq_modify_stacks(
+      data$stacks,
+      data$moves,
+      one_by_one = one_by_one
+    )
+
+  final_stacks |>
+    sapply(tail, 1) |>
+    paste(collapse = "")
+
+}
+
+f05a_old <- function(x) f05_old(x, one_by_one = TRUE)
+f05b_old <- function(x) f05_old(x, one_by_one = FALSE)
+
+modify_stacks <- function(stacks, n, from, to, one_by_one = TRUE) {
+
+  moved <- tail(stacks[[from]], n)
+  if (one_by_one) moved <- rev(moved)
+  stacks[[to]] <- c(stacks[[to]], moved)
+  stacks[[from]] <- head(stacks[[from]], -n)
+  stacks
+
+}
+
+seq_modify_stacks <- function(stacks, moves_matrix, one_by_one = TRUE) {
+
+  for (i in seq(nrow(moves_matrix))) {
+    stacks <-
+      modify_stacks(
+        stacks,
+        n    = moves_matrix[i, 1],
+        from = moves_matrix[i, 2],
+        to   = moves_matrix[i, 3],
+        one_by_one = one_by_one
+      )
+  }
+
+  stacks
+
+}

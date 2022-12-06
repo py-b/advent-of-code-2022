@@ -6,3 +6,13 @@ x <- readLines("./inst/input05.txt")
 
 stopifnot(p1 == aoc_solutions$day05a)
 stopifnot(p2 == aoc_solutions$day05b)
+
+# microbenchmark::microbenchmark(
+#   f05a(x),
+#   f05a_old(x)
+# )
+#
+# microbenchmark::microbenchmark(
+#   f05b(x),
+#   f05b_old(x)
+# )
