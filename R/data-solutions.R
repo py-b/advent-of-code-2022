@@ -18,8 +18,8 @@ aoc_solutions <- list(
   day05a = "VPCDMSLWJ",
   day05b = "TPWCGNCCG",
 
-  day06a = NA,
-  day06b = NA,
+  day06a = 1300,
+  day06b = 3986,
 
   day07a = NA,
   day07b = NA,
