@@ -26,7 +26,7 @@ f06 <- function(x, ndistinct) {
 
   for (i in seq(ndistinct, length(y))) {
     current <- y[seq(i - ndistinct + 1, i)]
-    if (length(unique(current)) == ndistinct) return(i)
+    if (!anyDuplicated(current)) return(i)
   }
 
   NULL
