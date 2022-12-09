@@ -65,6 +65,8 @@ visible_from_anywhere <- function(tm) {
 
 viewing_distance <- function(heights, i) {
 
+  if (heights[i] == 0) return(1)
+
   front    <- heights |> tail(-i)
   opposite <- heights |> head(i - 1) |> rev()
 
