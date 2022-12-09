@@ -4,4 +4,4 @@ x <- readLines("./inst/input09.txt")
 (p2 <- f09b(x))
 
 stopifnot(p1 == aoc_solutions$day09a)
-# stopifnot(p2 == aoc_solutions$day09b)
+stopifnot(p2 == aoc_solutions$day09b)

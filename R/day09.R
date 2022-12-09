@@ -10,21 +10,24 @@
 #' f09a(example_data_09())
 #' f09b(example_data_09())
 
-f09a <- function(x) {
-
-  moves <- read_moves_09(x)
-
-  r <- RopeMoves$new(0, 0, 0, 0)
-  for (m in moves) r$move(m)
-
-  r$visited |> unique() |> length()
-
-}
+f09a <- function(x) solve(x, n_knots = 2)
 
 #' @rdname day09
 #' @export
 
-f09b <- function(x) {
+f09b <- function(x) solve(x, n_knots = 10)
+
+
+# Solution ---------------------------------------------------------------------
+
+solve <- function(x, n_knots) {
+
+  moves <- read_moves_09(x)
+
+  r <- RopeMoves$new(n_knots)
+  for (m in moves) r$move(m)
+
+  r$visited |> unique() |> length()
 
 }
 
@@ -35,38 +38,45 @@ RopeMoves <- R6::R6Class("RopeMoves",
   public = list(
 
     visited = NULL,
-    head = NULL,
-    tail = NULL,
+    knots = NULL,
 
-    initialize = function(xhead = 0, yhead = 0, xtail = 0, ytail = 0) {
+    initialize = function(n_knots = 10) {
       self$visited <- c()
-      self$head <- list(x = xhead, y = yhead)
-      self$tail <- list(x = xtail, y = ytail)
+      self$knots <- vector(mode = "list", length = n_knots)
+      for (k in 1:n_knots) self$knots[[k]] <- list(x = 0, y = 0)
     },
 
     move = function(direction) {
 
-      # move head
-      if      (direction == "U") self$head$y <- self$head$y + 1
-      else if (direction == "D") self$head$y <- self$head$y - 1
-      else if (direction == "R") self$head$x <- self$head$x + 1
-      else if (direction == "L") self$head$x <- self$head$x - 1
+      n <- length(self$knots)
 
-      # tail follows
-      new_tail <- tail_reaction(self$head, self$tail)
-      self$tail$x <- new_tail$x
-      self$tail$y <- new_tail$y
+      # move head
+      if      (direction == "U") self$knots[[1]]$y <- self$knots[[1]]$y + 1
+      else if (direction == "D") self$knots[[1]]$y <- self$knots[[1]]$y - 1
+      else if (direction == "R") self$knots[[1]]$x <- self$knots[[1]]$x + 1
+      else if (direction == "L") self$knots[[1]]$x <- self$knots[[1]]$x - 1
+
+      # tails reactions
+      for (k in 2:n)
+        self$knots[[k]] <-
+          tail_reaction(
+            self$knots[[k - 1]],
+            self$knots[[k]]
+          )
 
       # update visited
-      self$visited <- c(self$visited, paste0(self$tail$x, ",", self$tail$y))
+      self$visited <- c(
+        self$visited,
+        paste0(self$knots[[n]]$x, ",", self$knots[[n]]$y)
+      )
 
       invisible(self)
 
     },
 
     print = function() {
-      cat("head", unlist(self$head), "\n")
-      cat("tail", unlist(self$tail), "\n")
+      cat("head 1 :", unlist(head(self$knots, 1)), "\n")
+      cat("tail", length(self$knots), ":", unlist(tail(self$knots, 1)), "\n")
     }
 
   )
