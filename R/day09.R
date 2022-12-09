@@ -12,12 +12,12 @@
 
 f09a <- function(x) {
 
- moves <- read_moves_09(x)
+  moves <- read_moves_09(x)
 
- r <- RopeMoves$new(0, 0, 0, 0)
- for (m in moves) r$move(m)
+  r <- RopeMoves$new(0, 0, 0, 0)
+  for (m in moves) r$move(m)
 
- r$visited |> unique() |> length()
+  r$visited |> unique() |> length()
 
 }
 
@@ -47,29 +47,17 @@ RopeMoves <- R6::R6Class("RopeMoves",
     move = function(direction) {
 
       # move head
-
       if      (direction == "U") self$head$y <- self$head$y + 1
       else if (direction == "D") self$head$y <- self$head$y - 1
       else if (direction == "R") self$head$x <- self$head$x + 1
       else if (direction == "L") self$head$x <- self$head$x - 1
 
       # tail follows
-
-      dx <- self$head$x - self$tail$x
-      dy <- self$head$y - self$tail$y
-      stopifnot(abs(dx) %in% 0:2, abs(dy) %in% 0:2)
-
-      if (dx == 0) {
-        if (abs(dy) == 2) self$tail$y <- self$tail$y + (dy / 2)
-      } else if (dy == 0) {
-        if (abs(dx) == 2) self$tail$x <- self$tail$x + (dx / 2)
-      } else if (abs(dx) > 1 || abs(dy) > 1) { # not on same row nor column
-        self$tail$x <- self$tail$x + dx / abs(dx)
-        self$tail$y <- self$tail$y + dy / abs(dy)
-      }
+      new_tail <- tail_reaction(self$head, self$tail)
+      self$tail$x <- new_tail$x
+      self$tail$y <- new_tail$y
 
       # update visited
-
       self$visited <- c(self$visited, paste0(self$tail$x, ",", self$tail$y))
 
       invisible(self)
@@ -96,6 +84,28 @@ read_moves_09 <- function(x) {
 
 }
 
+
+# tail_reaction -----------------------------------------------------------
+
+tail_reaction <- function(head, tail) {
+
+  dx <- head$x - tail$x
+  dy <- head$y - tail$y
+  stopifnot(abs(dx) %in% 0:2, abs(dy) %in% 0:2)
+
+  if (dx == 0) {
+    if (abs(dy) == 2) tail$y <- tail$y + dy / abs(dy)
+  } else if (dy == 0) {
+    if (abs(dx) == 2) tail$x <- tail$x + dx / abs(dx)
+  } else if (abs(dx) > 1 || abs(dy) > 1) { # not on same row nor column
+    tail$x <- tail$x + dx / abs(dx)
+    tail$y <- tail$y + dy / abs(dy)
+  }
+
+  tail
+
+}
+
 # Examples ---------------------------------------------------------------------
 
 #' @param example Which example data to use (by position or name). Defaults to
@@ -105,7 +115,7 @@ read_moves_09 <- function(x) {
 
 example_data_09 <- function(example = 1) {
   l <- list(
-    c(
+    a = c(
       "R 4",
       "U 4",
       "L 3",
@@ -114,6 +124,16 @@ example_data_09 <- function(example = 1) {
       "D 1",
       "L 5",
       "R 2"
+    ),
+    b = c(
+      "R 5",
+      "U 8",
+      "L 8",
+      "D 3",
+      "R 17",
+      "D 10",
+      "L 25",
+      "U 20"
     )
   )
   l[[example]]
