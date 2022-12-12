@@ -36,11 +36,7 @@ solve12b <- function(x) {
 
   graph <- mat_to_graph(grid)
 
-  paths <-
-    lapply(
-      starts,
-      function(start) shortest_path_silent(graph, start, end)
-    )
+  paths <- lapply(starts, \(start) shortest_path_silent(graph, start, end))
 
   paths_lengths <- lengths(paths) - 1
   paths_lengths[paths_lengths > 0] |> sort() |> head(1) |> unname()
