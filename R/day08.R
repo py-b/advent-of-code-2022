@@ -10,14 +10,14 @@
 #' f08a(example_data_08())
 #' f08b(example_data_08())
 
-f08a <- \(x) x |> as_tree_matrix() |> visible_from_anywhere() |> sum()
+f08a <- \(x) x |> parse08() |> visible_from_anywhere() |> sum()
 
 #' @rdname day08
 #' @export
 
 f08b <- function(x) {
 
-  m <- as_tree_matrix(x)
+  m <- parse08(x)
 
   res <- 0
 
@@ -35,15 +35,7 @@ f08b <- function(x) {
 
 # Utils ------------------------------------------------------------------------
 
-as_tree_matrix <- function(x)
-  x |>
-    strsplit("") |>
-    unlist() |>
-    as.integer() |>
-    matrix(
-      byrow = TRUE,
-      ncol = nchar(x[[1]])
-    )
+parse08 <- \(x) do.call(rbind, strsplit(x, "")) |> apply(1:2, as.integer)
 
 visible <- function(heights, rev = FALSE) {
   if (rev) heights <- rev(heights)
