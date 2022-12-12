@@ -74,7 +74,7 @@ mat_to_graph <- function(m) {
   relations_str <- c()
 
   for (i in seq(nrow(m)))
-    for (j in seq(ncol(m))) {
+    for (j in seq(ncol(m)))
       for (u in -1:1)
         for (v in -1:1)
           if (abs(u + v) == 1)
@@ -86,7 +86,6 @@ mat_to_graph <- function(m) {
               },
               silent = TRUE
             )
-    }
 
   relations <- do.call(rbind, strsplit(relations_str, "->"))
 
