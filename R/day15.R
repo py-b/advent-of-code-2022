@@ -11,22 +11,23 @@
 solve15a <- function(x, y0 = 2e+06) {
 
   sensors <- parse15(x)
-  intervals <- sensors |> sensors_infos() |> lapply(no_beacon, y0 = y0)
+  intervals_range <- no_beacon(sensors, y0 = y0)
 
-  intervals <- Filter(length, intervals)
-  if (sum(lengths(intervals)) == 0) return(0)
-  intervals <- do.call(rbind, intervals)
+  intervals_range <- Filter(length, intervals_range)
+  if (sum(lengths(intervals_range)) == 0) return(0)
+  intervals_range <- do.call(rbind, intervals_range)
 
   res <-
-    intervals |>
+    intervals_range |>
     intervals::Intervals() |>
     intervals::interval_union() |>
     intervals::size()
 
+  sensors <- as.matrix(sensors)
   devices <- rbind(sensors[, 1:2], sensors[, 3:4])
-  devices <- devices[devices[, 2] == y0, 1]
+  devices_on_y0 <- unique(devices[devices[, 2] == y0, 1])
 
-  (res + 1) - length(unique(devices))
+  (res + 1) - length(devices_on_y0)
 
 }
 
@@ -40,6 +41,7 @@ solve15b <- function(x) {
 # Parse data from string -------------------------------------------------------
 
 parse15 <- function(x) {
+
   res <-
     stringr::str_match(
       x,
@@ -48,49 +50,41 @@ parse15 <- function(x) {
         "closest beacon is at x=(-?\\d+), y=(-?\\d+)"
       )
     )[, -1]
-  colnames(res) <- c("Sx", "Sy", "Bx", "By")
-  apply(res, 1:2, as.integer)
+
+  colnames(res) <- c("x", "y", "beacon_x", "beacon_y")
+
+  res |> apply(1:2, as.integer) |> as.data.frame()
+
 }
 
 # utils ------------------------------------------------------------------------
 
-sensors_infos <- function(sensors) {
+no_beacon <- function(sensors, y0) {
+
+  sensors$manhattan_distance <-
+    with(
+      sensors,
+      abs(x - beacon_x) + abs(y - beacon_y)
+    )
 
   apply(
     sensors,
     1,
-    simplify = FALSE,
     function(sensor) {
-      size_x <- abs(sensor["Bx"] - sensor["Sx"])
-      size_y <- abs(sensor["By"] - sensor["Sy"])
-      manhattan_distance <- size_x + size_y
-      res <-
-        list(
-          manhattan_distance = manhattan_distance,
-          Sx = sensor[1],
-          Sy = sensor[2],
-          top_bound = sensor["Sy"] - manhattan_distance,
-          down_bound = sensor["Sy"] + manhattan_distance
-        )
-      lapply(res, unname)
+      dist_to_y0 <- abs(sensor["y"] - y0)
+      if (dist_to_y0 > sensor["manhattan_distance"]) return(NULL)
+      c(
+        sensor["x"] - sensor["manhattan_distance"] + dist_to_y0,
+        sensor["x"] + sensor["manhattan_distance"] - dist_to_y0
+      )
     }
   )
 
 }
 
-no_beacon <- function(sensor_info, y0 = 10) {
-  dist_to_y0 <- abs(sensor_info$Sy - y0)
-  if (dist_to_y0 > sensor_info$manhattan_distance) return(integer(0))
-  c(
-    sensor_info$Sx - sensor_info$manhattan_distance + dist_to_y0,
-    sensor_info$Sx + sensor_info$manhattan_distance - dist_to_y0
-  )
-}
-
-
 # Example ----------------------------------------------------------------------
 
-#' @param example Which example data to use (by position or name).
+#' @param example Which example data to use (beacon_y position or name).
 #' @rdname day15
 #' @export
 
