@@ -5,7 +5,7 @@
 #' @name day14
 #' @rdname day14
 #' @param x some data
-#' @param x quiet `FALSE` to print a log of sand movement.
+#' @param quiet `FALSE` to print a log of sand movement.
 #' @export
 #' @examples
 #' solve14a(example_data_14())
@@ -14,7 +14,7 @@
 solve14a <- function(x, quiet = TRUE) {
 
   cave_part1 <- Cave$new(x, infinite_floor = FALSE)
-  while (!cave_part1$no_space) cave_part1$add_sand()
+  while (!cave_part1$no_space) cave_part1$add_sand(quiet = quiet)
   cave_part1$sand_count
 
 }
@@ -134,7 +134,7 @@ Cave <- R6::R6Class("Cave",
 
     add_sand = function(x = 500, y = 0, quiet = TRUE) {
 
-      if(quiet) message("\nnew unit   (", x, ",", y, ")")
+      if (!quiet) message("\nnew unit   (", x, ",", y, ")")
 
       if (self$no_space) {
         message(
@@ -160,13 +160,13 @@ Cave <- R6::R6Class("Cave",
           # fall in endless void ?
           if (!length(cave[[x_chr]]) || x <= self$min_x || x >= self$max_x) {
             self$no_space <- TRUE
-            if(quiet) message("falling forever...")
+            if (!quiet) message("falling forever...")
             return(invisible(self))
           }
         }
 
         y <- min(cave[[x_chr]]) - 1 # fall to something
-        if(quiet) message("falling to (", x, ",", y, ")")
+        if (!quiet) message("falling to (", x, ",", y, ")")
 
         cave <- lapply(cave, \(depths) depths[depths > y])
 
@@ -197,7 +197,7 @@ Cave <- R6::R6Class("Cave",
 
         if (under[1] == y + 1 && under[2] == y + 1) {
           # rest
-          if(quiet) message("stops at   (", x, ",", y, ")")
+          if (!quiet) message("stops at   (", x, ",", y, ")")
           self$sand_count <- self$sand_count + 1
           self$occupied[[x_chr]] <- sort(c(y, self$occupied[[x_chr]]))
           return(invisible(self))
