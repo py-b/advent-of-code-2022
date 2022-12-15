@@ -44,7 +44,7 @@ parse14 <- function(x) {
   points <- points[!duplicated(points), ]
   rownames(points) <- NULL
 
-  tapply(points$x, points$y, sort, simplify = FALSE)
+  tapply(points$y, points$x, sort, simplify = FALSE)
 
 }
 
@@ -59,8 +59,8 @@ segments_to_points <- function(segments) {
       MARGIN = 1,
       function(coords)
         data.frame(
-          y = do.call(seq, as.list(coords[c(1, 3)])),
-          x = do.call(seq, as.list(coords[c(2, 4)]))
+          x = do.call(seq, as.list(coords[c(1, 3)])),
+          y = do.call(seq, as.list(coords[c(2, 4)]))
         )
     )
 
@@ -81,13 +81,13 @@ Cave <- R6::R6Class("Cave",
     sand_count = NULL,
     bottom = NULL,
     infinite_floor = NULL,
-    min_y = NULL,
-    max_y = NULL,
+    min_x = NULL,
+    max_x = NULL,
 
     full = NULL,    # part 1 end condition
     blocked = NULL, # part 2 end condition
 
-    initialize = function(x, infinite_floor = FALSE) {
+    initialize = function(rocks, infinite_floor = FALSE) {
 
       self$full <- FALSE
       self$blocked <- FALSE
@@ -95,11 +95,11 @@ Cave <- R6::R6Class("Cave",
 
       self$sand_count <- 0
 
-      self$occupied <- parse14(x)
+      self$occupied <- parse14(rocks)
 
-      occupied_y <- as.integer(names(self$occupied))
-      self$min_y <- if (infinite_floor) -Inf else min(occupied_y)
-      self$max_y <- if (infinite_floor)  Inf else max(occupied_y)
+      occupied_x <- as.integer(names(self$occupied))
+      self$min_x <- if (infinite_floor) -Inf else min(occupied_x)
+      self$max_x <- if (infinite_floor)  Inf else max(occupied_x)
 
       self$bottom <- max(unlist(self$occupied))
       if (infinite_floor) self$bottom <- self$bottom + 2
@@ -131,7 +131,8 @@ Cave <- R6::R6Class("Cave",
       )
     },
 
-    add_sand = function(y = 500, x = 0) {
+    add_sand = function(x = 500, y = 0) {
+
       if (self$full) {
         message("Impossible to add sand, cave is full (", self$sand_count, ").")
         return(invisible(self)) # do nothing
@@ -141,28 +142,28 @@ Cave <- R6::R6Class("Cave",
 
       while (TRUE) {
 
-        y_chr <- as.character(y)
+        x_chr <- as.character(x)
 
         if (!self$infinite_floor) {
           # fall in endless void ?
-          if (!length(cave[[y_chr]]) || y <= self$min_y || y >= self$max_y) {
+          if (!length(cave[[x_chr]]) || x <= self$min_x || x >= self$max_x) {
             self$full <- TRUE
             return(invisible(self))
           }
         }
 
-        x <- min(cave[[y_chr]]) - 1 # fall to something
+        y <- min(cave[[x_chr]]) - 1 # fall to something
 
-        cave <- lapply(cave, \(vals) vals[vals > x])
+        cave <- lapply(cave, \(depths) depths[depths > y])
 
-        if (self$infinite_floor && x == bottom - 1) {
+        if (self$infinite_floor && y == bottom - 1) {
 
           under <- c(bottom, bottom) # always a rock on bottom
 
         } else {
 
-          left_name <- as.character(y - 1)
-          right_name <- as.character(y + 1)
+          left_name <- as.character(x - 1)
+          right_name <- as.character(x + 1)
 
           if (!length(cave[[left_name]])) {
             self$full <- TRUE
@@ -179,19 +180,19 @@ Cave <- R6::R6Class("Cave",
 
         }
 
-        if (under[1] == x + 1 && under[2] == x + 1) {
+        if (under[1] == y + 1 && under[2] == y + 1) {
           # rest
           self$sand_count <- self$sand_count + 1
-          self$occupied[[y_chr]] <- sort(c(x, self$occupied[[y_chr]]))
+          self$occupied[[x_chr]] <- sort(c(y, self$occupied[[x_chr]]))
           return(invisible(self))
         }
 
-        if (under[1] > x + 1)
-          y <- y - 1 # go left
-        else if (under[2] > x + 1)
-          y <- y + 1 # go right
+        if (under[1] > y + 1)
+          x <- x - 1 # go left
+        else if (under[2] > y + 1)
+          x <- x + 1 # go right
 
-        x <- x + 1
+        y <- y + 1
 
       }
 
