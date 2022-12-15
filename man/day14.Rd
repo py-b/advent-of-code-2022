@@ -7,14 +7,14 @@
 \alias{example_data_14}
 \title{Day 14: Regolith Reservoir}
 \usage{
-solve14a(x)
+solve14a(x, quiet = TRUE)
 
 solve14b(x)
 
 example_data_14(example = 1)
 }
 \arguments{
-\item{x}{some data}
+\item{x}{quiet \code{FALSE} to print a log of sand movement.}
 
 \item{example}{Which example data to use (by position or name).}
 }

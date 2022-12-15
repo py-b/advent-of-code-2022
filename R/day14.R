@@ -5,15 +5,16 @@
 #' @name day14
 #' @rdname day14
 #' @param x some data
+#' @param x quiet `FALSE` to print a log of sand movement.
 #' @export
 #' @examples
 #' solve14a(example_data_14())
 #' solve14b(example_data_14())
 
-solve14a <- function(x) {
+solve14a <- function(x, quiet = TRUE) {
 
   cave_part1 <- Cave$new(x, infinite_floor = FALSE)
-  while (!cave_part1$full) cave_part1$add_sand()
+  while (!cave_part1$no_space) cave_part1$add_sand()
   cave_part1$sand_count
 
 }
@@ -84,12 +85,12 @@ Cave <- R6::R6Class("Cave",
     min_x = NULL,
     max_x = NULL,
 
-    full = NULL,    # part 1 end condition
-    blocked = NULL, # part 2 end condition
+    no_space = NULL, # part 1 end condition
+    blocked = NULL,  # part 2 end condition
 
     initialize = function(rocks, infinite_floor = FALSE) {
 
-      self$full <- FALSE
+      self$no_space <- FALSE
       self$blocked <- FALSE
       self$infinite_floor <- infinite_floor
 
@@ -131,10 +132,21 @@ Cave <- R6::R6Class("Cave",
       )
     },
 
-    add_sand = function(x = 500, y = 0) {
+    add_sand = function(x = 500, y = 0, quiet = TRUE) {
 
-      if (self$full) {
-        message("Impossible to add sand, cave is full (", self$sand_count, ").")
+      if(quiet) message("\nnew unit   (", x, ",", y, ")")
+
+      if (self$no_space) {
+        message(
+          "Impossible to add sand, no more space left (", self$sand_count, ")."
+        )
+        return(invisible(self)) # do nothing
+      }
+
+      if (self$blocked) {
+        message(
+          "Impossible to add sand, source is blocked (", self$sand_count, ")."
+        )
         return(invisible(self)) # do nothing
       }
 
@@ -147,12 +159,14 @@ Cave <- R6::R6Class("Cave",
         if (!self$infinite_floor) {
           # fall in endless void ?
           if (!length(cave[[x_chr]]) || x <= self$min_x || x >= self$max_x) {
-            self$full <- TRUE
+            self$no_space <- TRUE
+            if(quiet) message("falling forever...")
             return(invisible(self))
           }
         }
 
         y <- min(cave[[x_chr]]) - 1 # fall to something
+        if(quiet) message("falling to (", x, ",", y, ")")
 
         cave <- lapply(cave, \(depths) depths[depths > y])
 
@@ -166,10 +180,11 @@ Cave <- R6::R6Class("Cave",
           right_name <- as.character(x + 1)
 
           if (!length(cave[[left_name]])) {
-            self$full <- TRUE
+            self$no_space <- TRUE
             return(invisible(self))
           } else if (!length(cave[[right_name]])) {
-            cave[[right_name]] <- NA_integer_
+            self$no_space <- TRUE
+            return(invisible(self))
           }
 
           under <-
@@ -182,6 +197,7 @@ Cave <- R6::R6Class("Cave",
 
         if (under[1] == y + 1 && under[2] == y + 1) {
           # rest
+          if(quiet) message("stops at   (", x, ",", y, ")")
           self$sand_count <- self$sand_count + 1
           self$occupied[[x_chr]] <- sort(c(y, self$occupied[[x_chr]]))
           return(invisible(self))
@@ -191,8 +207,6 @@ Cave <- R6::R6Class("Cave",
           x <- x - 1 # go left
         else if (under[2] > y + 1)
           x <- x + 1 # go right
-
-        y <- y + 1
 
       }
 
