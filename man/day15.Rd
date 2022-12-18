@@ -7,7 +7,7 @@
 \alias{example_data_15}
 \title{Day 15: Beacon Exclusion Zone}
 \usage{
-solve15a(x, y0 = 2e+06)
+solve15a(x, y0 = 2000000)
 
 solve15b(x)
 

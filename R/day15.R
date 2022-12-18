@@ -84,7 +84,7 @@ no_beacon <- function(sensors, y0) {
 
 # Example ----------------------------------------------------------------------
 
-#' @param example Which example data to use (beacon_y position or name).
+#' @param example Which example data to use (by position or name).
 #' @rdname day15
 #' @export
 
