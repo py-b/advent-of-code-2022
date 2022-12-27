@@ -4,7 +4,9 @@
 #'
 #' @name day11
 #' @rdname day11
-#' @param x some data
+#' @param x monkeys characteristics
+#' @param rounds number of rounds to exectute
+#' @param modulo use modulo (`FALSE` for part 1, `TRUE` for part 2)
 #' @export
 #' @examples
 #' solve11a(example_data_11())
@@ -69,7 +71,7 @@ Monkey <- R6::R6Class("Monkey",
     items_repartition = function() {
       if (!length(self$items)) return(NULL)
       receivers <- ifelse(self$items %% self$div, self$m2, self$m1)
-      tapply(self$items, receivers, c)
+      split(self$items, receivers)
     },
 
     throw = function() {
