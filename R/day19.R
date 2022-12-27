@@ -143,8 +143,8 @@ Collector <- R6::R6Class("Collector",
     collect = function() {
       self$ore      <- self$ore + self$ore_robot
       self$clay     <- self$clay + self$clay_robot
-      self$obsidian <- self$obsidian + self$obsidian
-      self$geode    <- self$geode + self$geode
+      self$obsidian <- self$obsidian + self$obsidian_robot
+      self$geode    <- self$geode + self$geode_robot
       invisible(self)
     },
 
