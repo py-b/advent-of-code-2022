@@ -5,8 +5,6 @@
 #' @name day11
 #' @rdname day11
 #' @param x monkeys characteristics
-#' @param rounds number of rounds to exectute
-#' @param modulo use modulo (`FALSE` for part 1, `TRUE` for part 2)
 #' @export
 #' @examples
 #' solve11a(example_data_11())
@@ -22,6 +20,9 @@ solve11b <- \(x) solve11(x, rounds = 10000, modulo = TRUE)
 # Solve -------------------------------------------------------------------
 
 solve11 <- function(x, rounds, modulo) {
+
+  # @param rounds number of rounds to exectute
+  # @param modulo use modulo (`FALSE` for part 1, `TRUE` for part 2)
 
   monkeys <- parse_monkeys(x)
   mod <- if (modulo) monkeys |> sapply(\(x) x$div) |> prod() else NULL

@@ -14,6 +14,8 @@ solve12b(x)
 example_data_12(example = 1)
 }
 \arguments{
+\item{x}{some data}
+
 \item{example}{Which example data to use (by position or name).}
 }
 \description{

@@ -4,6 +4,7 @@
 #'
 #' @name day12
 #' @rdname day12
+#' @param x some data
 #' @export
 #' @examples
 #' solve12a(example_data_12())
@@ -11,7 +12,7 @@
 
 solve12a <- function(x) {
 
-  grid <- parse11(x)
+  grid <- parse12(x)
   start <- attr(grid, "start")
   end <- attr(grid, "end")
 
@@ -27,7 +28,7 @@ solve12a <- function(x) {
 
 solve12b <- function(x) {
 
-  grid <- parse11(x)
+  grid <- parse12(x)
   end <- attr(grid, "end")
 
   starts <-
@@ -45,7 +46,7 @@ solve12b <- function(x) {
 
 # Parse input-------------------------------------------------------------------
 
-parse11 <- function(x) {
+parse12 <- function(x) {
 
   m_letters <- do.call(rbind, strsplit(x, ""))
 

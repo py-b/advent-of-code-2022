@@ -18,10 +18,6 @@ example_data_11(example = 1)
 
 \item{example}{Which example data to use (by position or name). Defaults to
 1.}
-
-\item{rounds}{number of rounds to exectute}
-
-\item{modulo}{use modulo (\code{FALSE} for part 1, \code{TRUE} for part 2)}
 }
 \description{
 \href{https://adventofcode.com/2022/day/11}{Monkey in the Middle}
