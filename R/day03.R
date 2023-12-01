@@ -58,6 +58,8 @@ example_data_03 <- function(example = 1) {
 
 # utils ------------------------------------------------------------------------
 
+#' @importFrom utils head tail
+
 baggify <- function(x) {
 
   res <- strsplit(x, "")
@@ -71,6 +73,8 @@ baggify <- function(x) {
   )
 
 }
+
+#' @importFrom stats setNames
 
 priority <- setNames(c(1:52), c(letters, LETTERS))
 
