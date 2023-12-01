@@ -93,7 +93,7 @@ aoc_solutions <- list(
   day24a = NA,
   day24b = NA,
 
-  day25a = NA,
+  day25a = "2-==10--=-0101==1201",
   day25b = NA
 
 )
